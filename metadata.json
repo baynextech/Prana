@@ -1,0 +1,6 @@
+{
+  "name": "Prana",
+  "description": "Minimalist yoga teacher directory and social network with AI assistant",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
