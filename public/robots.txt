@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /perfil
+Disallow: /checkout-simulator
+
+Sitemap: https://prana.com/sitemap.xml

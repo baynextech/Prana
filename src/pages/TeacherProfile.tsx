@@ -89,8 +89,28 @@ export function TeacherProfile() {
     <div className="py-12 px-6 max-w-5xl mx-auto">
       <SEOMeta 
         title={`Clases de ${teacher.specialty} con ${teacher.name} en ${teacher.location}`}
-        description={`Clases de yoga estilo ${teacher.specialty} dictadas por ${teacher.name} en ${teacher.location}. Tarifa: ${teacher.price}. Reservá tu sesión y consultá directamente por WhatsApp o Email.`}
-        keywords={`clases de yoga, ${teacher.name}, yoga en ${teacher.location}, ${teacher.specialty}, profesor de yoga ${teacher.location}`}
+        description={`Clases de ${teacher.discipline || "Yoga"} estilo ${teacher.specialty} dictadas por ${teacher.name} en ${teacher.location}. Tarifa: ${teacher.price}. Reservá tu sesión y consultá directamente.`}
+        keywords={`clases de ${teacher.discipline || "yoga"}, ${teacher.name}, ${teacher.discipline || "yoga"} en ${teacher.location}, ${teacher.specialty}, profesor de ${teacher.discipline || "yoga"} ${teacher.location}`}
+        ogImage={teacher.image}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "name": teacher.name,
+          "jobTitle": `Instructor de ${teacher.discipline || "Yoga & Pilates"}`,
+          "description": teacher.bio,
+          "image": teacher.image,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": teacher.location,
+            "addressRegion": "Buenos Aires",
+            "addressCountry": "AR"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": teacher.rating,
+            "reviewCount": teacher.reviews
+          }
+        }}
       />
       <Link to="/directorio" className="inline-flex items-center gap-2 text-[#5D5D5D] hover:text-[#2C2C2C] mb-8 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Volver al directorio

@@ -1,6 +1,6 @@
 {
   "name": "Prana",
-  "description": "Minimalist yoga teacher directory and social network with AI assistant",
+  "description": "Plataforma de Yoga, Pilates (Reformer/Mat), directorio de profesores, institutos y tienda oficial con asistente IA",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

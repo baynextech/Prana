@@ -52,9 +52,33 @@ export function Home() {
   return (
     <>
       <SEOMeta 
-        title="Prana - Profesores, Estudios y Clases de Yoga en tu Zona"
-        description="Encontrá los mejores profesores, instructores y centros de yoga cerca de tu zona. Reservá clases de Ashtanga, Hatha, Vinyasa y Kundalini con conexión directa y sin comisiones."
-        keywords="clases de yoga, profesores de yoga, estudios de yoga, yoga buenos aires, yoga palermo, yoga recoleta, ashtanga yoga, hatha, vinyasa, meditación"
+        title="Prana - Profesores, Institutos y Tienda de Yoga & Pilates"
+        description="Encontrá los mejores profesores, instructores e institutos de Yoga y Pilates (Reformer, Mat, Barre) en Buenos Aires. Leé opiniones reales, reservá clases y equipate en nuestra tienda oficial."
+        keywords="clases de yoga, profesores de yoga, instructores de pilates, pilates reformer, institutos de pilates, yoga buenos aires, yoga palermo, recoleta, belgrano, san telmo, tienda de yoga, mats de yoga"
+        ogImage="/images/yoga_hero_1779994397642.png"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              "@id": "https://prana.com/#website",
+              "url": "https://prana.com/",
+              "name": "Prana Yoga & Pilates",
+              "description": "La plataforma líder para conectar con profesores e institutos de Yoga & Pilates en Argentina.",
+              "inLanguage": "es-AR"
+            },
+            {
+              "@type": "Organization",
+              "@id": "https://prana.com/#organization",
+              "name": "Prana Bienestar",
+              "url": "https://prana.com/",
+              "logo": "https://prana.com/images/yoga_hero_1779994397642.png",
+              "sameAs": [
+                "https://instagram.com/pranayoga.ar"
+              ]
+            }
+          ]
+        }}
       />
       <Hero />
 

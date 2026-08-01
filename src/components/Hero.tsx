@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 
 const HERO_IMAGES = [
-  "/src/assets/images/yoga_hero_1779994397642.png",
-  "/src/assets/images/yoga_man_1779999909154.png",
-  "/src/assets/images/yoga_woman_1779999926237.png",
-  "/src/assets/images/yoga_group_1779999945784.png"
+  "/images/yoga_hero_1779994397642.png",
+  "/images/yoga_man_1779999909154.png",
+  "/images/yoga_woman_1779999926237.png",
+  "/images/yoga_group_1779999945784.png"
 ];
 
 export function Hero() {

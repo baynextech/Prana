@@ -8,6 +8,7 @@ export interface Teacher {
   id: string;
   name: string;
   specialty: string;
+  discipline?: string;
   location: string;
   rating: number;
   reviews: number;
@@ -80,10 +81,23 @@ export function TeacherCard({ teacher, onToggleFavoriteOverride }: { teacher: Te
         <div className="p-6 flex flex-col flex-grow">
           <div className="flex justify-between items-start mb-2">
             <div>
-              <h3 className="text-xl font-medium text-[#2C2C2C]">{localTeacher.name}</h3>
-              <p className="text-[#8CAE99] text-sm font-medium mt-1">{localTeacher.specialty}</p>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-xl font-medium text-[#2C2C2C]">{localTeacher.name}</h3>
+                {localTeacher.discipline && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                    localTeacher.discipline === "Pilates" 
+                      ? "bg-[#2C2C2C] text-white" 
+                      : localTeacher.discipline === "Yoga & Pilates"
+                      ? "bg-[#8CAE99] text-white"
+                      : "bg-[#8CAE99]/15 text-[#8CAE99]"
+                  }`}>
+                    {localTeacher.discipline}
+                  </span>
+                )}
+              </div>
+              <p className="text-[#8CAE99] text-sm font-medium">{localTeacher.specialty}</p>
             </div>
-            <span className="text-[#5D5D5D] text-sm">{localTeacher.price}</span>
+            <span className="text-[#5D5D5D] text-sm font-semibold">{localTeacher.price}</span>
           </div>
           <div className="flex items-center gap-2 text-[#5D5D5D] text-sm mb-2">
             <MapPin className="w-4 h-4" />

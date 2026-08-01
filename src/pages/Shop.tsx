@@ -260,6 +260,26 @@ export function Shop() {
         title="Tienda de Yoga & Pilates | Equipamiento, Mats y Accesorios - Prana"
         description="Comprá el mejor equipamiento para tu práctica de Yoga y Pilates: Mats ecológicos, colchonetas para Reformer, aros Magic Circle, bloques de corcho, indumentaria y aromaterapia."
         keywords="tienda de yoga, productos pilates, mats de yoga, reformer mats, aro de pilates, bloques de corcho, tienda prana"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "itemListElement": PRODUCTS.map((prod, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Product",
+              "name": prod.name,
+              "description": prod.description,
+              "image": prod.image,
+              "offers": {
+                "@type": "Offer",
+                "priceCurrency": "ARS",
+                "price": prod.price,
+                "availability": prod.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+              }
+            }
+          }))
+        }}
       />
 
       {/* Floating Toast Notification */}
