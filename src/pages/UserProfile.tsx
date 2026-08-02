@@ -3,6 +3,7 @@ import { User, Heart, MessageSquare, Camera, Edit2, Star, Save, Calendar, Shield
 import { TeacherCard, Teacher } from "../components/TeacherCard";
 import { useFavorites } from "../hooks/useFavorites";
 import { Link, useSearchParams } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const convertToWebP = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -113,18 +114,26 @@ export function UserProfile() {
   const [saveLandingSuccess, setSaveLandingSuccess] = useState(false);
   
   const { favorites } = useFavorites();
+  const { token, isAuthenticated, profile: authProfile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const authHeaders = () => ({
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  });
+
   const fetchUserData = async () => {
+    if (!token) { setIsLoading(false); return; }
     try {
+      const headers = { Authorization: `Bearer ${token}` };
       const [profileRes, teachersRes, reviewsRes, bookingsRes, visitedRes, statsRes] = await Promise.all([
-        fetch("/api/user/profile"),
+        fetch("/api/user/profile", { headers }),
         fetch("/api/teachers?location=Todos"),
-        fetch("/api/user/reviews"),
-        fetch("/api/user/bookings"),
-        fetch("/api/user/visited"),
-        fetch("/api/user/teacher-stats")
+        fetch("/api/user/reviews", { headers }),
+        fetch("/api/user/bookings", { headers }),
+        fetch("/api/user/visited", { headers }),
+        fetch("/api/user/teacher-stats", { headers })
       ]);
 
       const profileData = await profileRes.json();
@@ -186,7 +195,7 @@ export function UserProfile() {
         try {
           const confirmRes = await fetch("/api/payments/confirm", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authHeaders(),
             body: JSON.stringify({ type, itemId })
           });
           if (confirmRes.ok) {
@@ -270,7 +279,7 @@ export function UserProfile() {
     try {
       const res = await fetch("/api/user/profile", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify(editForm)
       });
       const data = await res.json();
@@ -298,7 +307,7 @@ export function UserProfile() {
     try {
       const response = await fetch("/api/payments/mercadopago", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ type, itemId, title, price })
       });
       const data = await response.json();
@@ -323,7 +332,7 @@ export function UserProfile() {
     try {
       const res = await fetch("/api/teachers/create-or-update", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify(landingForm)
       });
       
@@ -353,6 +362,19 @@ export function UserProfile() {
       }
     });
   };
+
+  if (!isAuthenticated && !isLoading) {
+    return (
+      <div className="py-24 px-6 max-w-7xl mx-auto flex flex-col justify-center items-center h-[60vh] text-center gap-6">
+        <User className="w-16 h-16 text-[#E5E5E5]" />
+        <h2 className="text-2xl font-medium text-[#2C2C2C]">Iniciá sesión para ver tu perfil</h2>
+        <p className="text-[#5D5D5D] max-w-sm">Creá una cuenta o ingresá para acceder a tus reservas, favoritos y configuración.</p>
+        <Link to="/" className="px-6 py-3 bg-[#8CAE99] hover:bg-[#7a9d88] text-white rounded-full font-medium transition-colors">
+          Volver al inicio
+        </Link>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

@@ -9,6 +9,7 @@ import { UserProfile } from "./pages/UserProfile";
 import { TeacherProfile } from "./pages/TeacherProfile";
 import { CheckoutSimulator } from "./pages/CheckoutSimulator";
 import { Shop } from "./pages/Shop";
+import { AdminPanel } from "./pages/AdminPanel";
 import { AuthProvider } from "./contexts/AuthContext";
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="profesor/:id" element={<TeacherProfile />} />
             <Route path="tienda" element={<Shop />} />
             <Route path="shop" element={<Shop />} />
+            <Route path="admin" element={<AdminPanel />} />
           </Route>
           <Route path="checkout-simulator" element={<CheckoutSimulator />} />
         </Routes>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Mail, Lock, User } from "lucide-react";
+import { X, Mail, Lock, User, AlertCircle } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 interface AuthModalProps {
@@ -15,13 +15,16 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
   const [name, setName] = useState("");
   const [role, setRole] = useState<"alumno" | "profesor" | "instituto">("alumno");
   const [isResetSent, setIsResetSent] = useState(false);
-  const { login } = useAuth();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login, register } = useAuth();
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError("");
+
     if (mode === "forgot") {
       if (!email) return;
       setIsResetSent(true);
@@ -29,34 +32,44 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
     }
 
     if (!email || !password) return;
-    
-    if (mode === "register") {
-      login(email, name, role);
-    } else {
-      // Si entra como profe o instituto en el login o alumno, dejamos que use el rol de su cuenta o por defecto
-      const resolvedRole = email.includes("profe") ? "profesor" : (email.includes("inst") ? "instituto" : "alumno");
-      login(email, undefined, resolvedRole);
+
+    setLoading(true);
+    try {
+      if (mode === "register") {
+        const result = await register(email, password, name, role === "instituto" ? "profesor" : role);
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
+      } else {
+        const result = await login(email, password);
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
+      }
+      onClose();
+    } finally {
+      setLoading(false);
     }
-    
-    onClose();
   };
 
   const handleModeChange = (newMode: "login" | "register" | "forgot") => {
     setMode(newMode);
     setIsResetSent(false);
+    setError("");
   };
-
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-6 right-6 text-[#5D5D5D] hover:text-[#2C2C2C] transition-colors p-2 rounded-full hover:bg-black/5"
         >
           <X className="w-5 h-5" />
         </button>
-        
+
         <div className="text-center mb-8">
           <h2 className="text-3xl font-medium text-[#2C2C2C] mb-2">
             {mode === "login" && "¡Hola de nuevo!"}
@@ -71,14 +84,21 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
           </p>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-red-700 text-sm">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         {mode === "forgot" && isResetSent ? (
           <div className="flex flex-col gap-4">
-             <button 
-                onClick={() => handleModeChange("login")}
-                className="w-full bg-[#8CAE99] hover:bg-[#7a9d88] text-white py-3 rounded-full font-medium transition-colors"
-              >
-                Volver a ingresar
-             </button>
+            <button
+              onClick={() => handleModeChange("login")}
+              className="w-full bg-[#8CAE99] hover:bg-[#7a9d88] text-white py-3 rounded-full font-medium transition-colors"
+            >
+              Volver a ingresar
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -101,42 +121,20 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     Registrarme como:
                   </label>
                   <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      id="role-btn-alumno"
-                      onClick={() => setRole("alumno")}
-                      className={`py-2.5 px-2 rounded-xl border text-xs font-medium transition-all ${
-                        role === "alumno"
-                          ? "bg-[#8CAE99] text-white border-[#8CAE99] shadow-sm"
-                          : "bg-white text-[#5D5D5D] border-[#E5E5E5] hover:border-[#8CAE99]/50"
-                      }`}
-                    >
-                      Alumno/a
-                    </button>
-                    <button
-                      type="button"
-                      id="role-btn-profesor"
-                      onClick={() => setRole("profesor")}
-                      className={`py-2.5 px-2 rounded-xl border text-xs font-medium transition-all ${
-                        role === "profesor"
-                          ? "bg-[#8CAE99] text-white border-[#8CAE99] shadow-sm"
-                          : "bg-white text-[#5D5D5D] border-[#E5E5E5] hover:border-[#8CAE99]/50"
-                      }`}
-                    >
-                      Profesor/a
-                    </button>
-                    <button
-                      type="button"
-                      id="role-btn-instituto"
-                      onClick={() => setRole("instituto")}
-                      className={`py-2.5 px-2 rounded-xl border text-xs font-medium transition-all ${
-                        role === "instituto"
-                          ? "bg-[#8CAE99] text-white border-[#8CAE99] shadow-sm"
-                          : "bg-white text-[#5D5D5D] border-[#E5E5E5] hover:border-[#8CAE99]/50"
-                      }`}
-                    >
-                      Instituto
-                    </button>
+                    {(["alumno", "profesor", "instituto"] as const).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`py-2.5 px-2 rounded-xl border text-xs font-medium transition-all ${
+                          role === r
+                            ? "bg-[#8CAE99] text-white border-[#8CAE99] shadow-sm"
+                            : "bg-white text-[#5D5D5D] border-[#E5E5E5] hover:border-[#8CAE99]/50"
+                        }`}
+                      >
+                        {r === "alumno" ? "Alumno/a" : r === "profesor" ? "Profesor/a" : "Instituto"}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </>
@@ -170,8 +168,8 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
 
             {mode === "login" && (
               <div className="flex justify-end">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => handleModeChange("forgot")}
                   className="text-sm text-[#5D5D5D] hover:text-[#8CAE99] font-medium transition-colors"
                 >
@@ -180,10 +178,14 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               </div>
             )}
 
-            <button 
+            <button
               type="submit"
-              className="w-full bg-[#8CAE99] hover:bg-[#7a9d88] text-white py-3 rounded-full font-medium transition-colors mt-2"
+              disabled={loading}
+              className="w-full bg-[#8CAE99] hover:bg-[#7a9d88] text-white py-3 rounded-full font-medium transition-colors mt-2 disabled:opacity-60 flex items-center justify-center gap-2"
             >
+              {loading && (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
               {mode === "login" && "Ingresar"}
               {mode === "register" && "Registrarse"}
               {mode === "forgot" && "Enviar link"}
@@ -208,7 +210,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
             </p>
           ) : (
             <p>
-               <button type="button" onClick={() => handleModeChange("login")} className="text-[#8CAE99] font-medium hover:underline">
+              <button type="button" onClick={() => handleModeChange("login")} className="text-[#8CAE99] font-medium hover:underline">
                 Volver a ingresar
               </button>
             </p>

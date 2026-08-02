@@ -7,7 +7,7 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export function RootLayout() {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, profile, isAdmin } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -44,6 +44,11 @@ export function RootLayout() {
           <div className="hidden md:flex items-center gap-4">
             {isAuthenticated ? (
               <>
+                {isAdmin && (
+                  <Link to="/admin" className="flex items-center gap-1.5 bg-[#2C2C2C] hover:bg-black text-white px-4 py-2 rounded-full text-xs font-bold transition-colors">
+                    Admin
+                  </Link>
+                )}
                 <Link to="/perfil" className="flex items-center gap-2 bg-[#FDFBF7] hover:bg-[#E5E5E5] text-[#2C2C2C] px-5 py-2.5 rounded-full text-sm font-medium transition-colors border border-[#E5E5E5]">
                   Mi Perfil
                 </Link>
@@ -141,7 +146,7 @@ export function RootLayout() {
                   {isAuthenticated ? (
                     <div className="flex items-center justify-between px-3">
                       <span className="text-sm text-[#5D5D5D] truncate max-w-[150px]">
-                        Hola, {user?.name}
+                        Hola, {profile?.name || profile?.email}
                       </span>
                       <button 
                         onClick={() => {
