@@ -24,7 +24,8 @@ async function startServer() {
   app.use(express.json());
 
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", gemini: !!process.env.GEMINI_API_KEY });
+    const key = process.env.GEMINI_API_KEY || "";
+    res.json({ status: "ok", gemini: !!key, keyLen: key.length, keyStart: key.slice(0, 4) });
   });
 
   // Mock data for teachers
