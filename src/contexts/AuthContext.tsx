@@ -15,6 +15,7 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<{ error?: string }>;
   register: (email: string, password: string, name: string, role?: string) => Promise<{ error?: string }>;
+  loginWithGithub: () => void;
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
@@ -24,13 +25,31 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const SUPABASE_URL = "https://wuiyvwzcxusqgazozqbz.supabase.co";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("prana_token"));
 
   useEffect(() => {
-    if (token) refreshProfile();
+    // Detectar callback OAuth (token en hash de URL)
+    const hash = window.location.hash;
+    if (hash && hash.includes("access_token=")) {
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get("access_token");
+      if (accessToken) {
+        localStorage.setItem("prana_token", accessToken);
+        setToken(accessToken);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        fetch("/api/auth/me", { headers: { Authorization: `Bearer ${accessToken}` } })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => { if (data) { setUser(data.user); setProfile(data.profile); } })
+          .catch(() => {});
+      }
+    } else if (token) {
+      refreshProfile();
+    }
   }, []);
 
   const refreshProfile = async () => {
@@ -92,6 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const loginWithGithub = () => {
+    const redirectTo = `${window.location.origin}/perfil`;
+    window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(redirectTo)}`;
+  };
+
   const logout = () => {
     localStorage.removeItem("prana_token");
     setToken(null);
@@ -102,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user, profile, token,
-      login, register, logout,
+      login, register, loginWithGithub, logout,
       isAuthenticated: !!user,
       isAdmin: profile?.role === "admin",
       isTeacher: profile?.role === "profesor" || profile?.role === "admin",
