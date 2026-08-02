@@ -6,14 +6,16 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      "User-Agent": "aistudio-build",
+function getAI() {
+  return new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+    httpOptions: {
+      headers: {
+        "User-Agent": "aistudio-build",
+      },
     },
-  },
-});
+  });
+}
 
 async function startServer() {
   const app = express();
@@ -431,7 +433,7 @@ async function startServer() {
   app.post("/api/smart-search", async (req, res) => {
     try {
       const { query } = req.body;
-      const response = await ai.models.generateContent({
+      const response = await getAI().models.generateContent({
         model: "gemini-3.5-flash",
         contents: `Based on the user's natural language query: "${query}", which of the following teachers are the best match?
         Teachers array: ${JSON.stringify(teachers.map(t => ({ id: t.id, name: t.name, location: t.location, specialty: t.specialty, bio: t.bio, price: t.price, availableDays: t.availableDays })))}
@@ -586,7 +588,7 @@ async function startServer() {
         `- ${t.name} (Especialidad: ${t.specialty}, Ubicación: ${t.location}, Precio: ${t.price}, Link: /profesor/${t.id}, Bio: ${t.bio})`
       ).join("\n");
 
-      const chat = ai.chats.create({
+      const chat = getAI().chats.create({
         model: "gemini-3.5-flash",
         config: {
           systemInstruction: `Sos un instructor y guía holístico muy amigable, sabio y conocedor. Sos el asistente de IA oficial de la plataforma Prana (Yoga, Pilates & Bienestar).
