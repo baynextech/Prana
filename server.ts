@@ -408,6 +408,32 @@ async function startServer() {
     res.json(data || []);
   });
 
+  app.put("/api/admin/bookings/:id", requireAdmin, async (req, res) => {
+    const { data } = await supabase.from("bookings").update(req.body).eq("id", req.params.id).select().single();
+    res.json(data);
+  });
+
+  app.delete("/api/admin/bookings/:id", requireAdmin, async (req, res) => {
+    await supabase.from("bookings").delete().eq("id", req.params.id);
+    res.json({ success: true });
+  });
+
+  app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
+    const { data, error } = await supabase.from("teachers").insert({ ...req.body, created_at: new Date().toISOString() }).select().single();
+    if (error) return res.status(400).json({ error: error.message });
+    res.json(data);
+  });
+
+  app.get("/api/admin/reviews", requireAdmin, async (_req, res) => {
+    const { data } = await supabase.from("reviews").select("*, profiles(name, email), teachers(name)").order("created_at", { ascending: false }).limit(200);
+    res.json(data || []);
+  });
+
+  app.delete("/api/admin/reviews/:id", requireAdmin, async (req, res) => {
+    await supabase.from("reviews").delete().eq("id", req.params.id);
+    res.json({ success: true });
+  });
+
   // ==================== SMART SEARCH ====================
   app.post("/api/smart-search", async (req, res) => {
     const { query } = req.body;
